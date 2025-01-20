@@ -14,12 +14,27 @@ In Project 1, we developed a server that could handle one client and encrypt/dec
 ## How could our server program handle multiple clients? 
 Our server program handles multiple clients by using multithreading. Each client connection is handled in a separate thread, allowing the server to manage multiple clients concurrently. 
 
+First, our server listens for incoming client connections using:
+```python
+server_socket.listen(5)
+```
+This allows the server to accept up to 5 pending connections simultaneously. The number "5" was chosen arbitrarily, and any number could have been typed here.
+
+Then, when a client connects, the server accepts the connection. This creates a dedicated client_socket for communication with the specific client.
+```python
+client_socket, client_address = server_socket.accept()
+```
+
+After that, for each new client, the server starts a new thread to handle that client. 
 ```python
 client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
 client_thread.start()
 ```
-The handle_client function processes messages from individual clients. 
+```target = handle_client:``` this specifies the function (```handle_client```) that will handle communication with the client. 
 
+```args=(client_socket, client_address)``` passes the client-specific socket and address to the handle_client function. 
+
+The handle_client function processes messages from individual clients. 
 ```python
 def handle_client(client_socket, client_address):
     while True:
@@ -29,3 +44,4 @@ def handle_client(client_socket, client_address):
         encrypted_response = cipher.encrypt(response)
         client_socket.send(encrypted_response.encode())
 ```
+Inside this function, the server receives message from the client in the first line, with the argument 1024 specifying the maximum buffer size for the incoming data. In this case, the server can read up to 1024 bytes in a single operation. Then, it decrypts them, and displays them. Then, it waits for input from the server operator, encrypts the response, and sends it back to the client. If the client disconnects, the function ends, and the thread effectively terminates. 
