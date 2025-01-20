@@ -47,4 +47,46 @@ def handle_client(client_socket, client_address):
 ```
 Inside this function, the server receives message from the client in the first line, with the argument 1024 specifying the maximum buffer size for the incoming data. In this case, the server can read up to 1024 bytes in a single operation. Then, it decrypts them, and displays them. Then, it waits for input from the server operator, encrypts the response, and sends it back to the client. If the client disconnects, the function ends, and the thread effectively terminates. 
 
+## Where did you encrypt chat messages in your program?
+# Encryption on the Client Side
+When the client sends a message to the server, the client first encrypts the message using the Vigenere cipher before sending it. This happens in the following lines: 
+```python
+# Encrypt and send the message
+encrypted_message = cipher.encrypt(message)  # Message encryption
+client_socket.send(encrypted_message.encode())  # Sending the encrypted message
+```
+The purpose of this is that the plain-text message typed by the user is encrypted using the shared key before being sent to the server. This ensures that the message remains secure while being transmitted over the network. 
 
+
+# Encryption on the Server Side
+When the server responds to the client, it encrypts the server operator's response before sending it to the client. This happens in the following lines:
+```python
+# Get server's response and encrypt it
+response = input("Enter Server Response: ")  # Server operator's plain-text response
+encrypted_response = cipher.encrypt(response)  # Encrypting the response
+client_socket.send(encrypted_response.encode())  # Sending the encrypted response
+```
+
+This encrypts its response to ensure that only the client (who has the shared key) can decrypt and read the message. 
+
+## Where did you decrypt chat messages in your program? 
+# Decryption on the Client Side
+When the client receives a response from the server, it decrypts the encrypted response to retrieve the original plain text. This happens in the following lines of code:
+
+```python
+# Receive and decrypt server response
+encrypted_response = client_socket.recv(1024).decode()  # Receive and decode
+decrypted_response = cipher.decrypt(encrypted_response)  # Decrypt the response
+print(f"Server: {decrypted_response}")  # Display the plain-text response
+```
+
+Here, the client decrypts the server's response using the shared key, allowing the user to read the original message sent by the server. 
+
+# Decryption on the Server Side 
+When the server receives the encrypted message from the client, it decrypts the message using the Vigenere cipher to retrieve the original plain text. This happens in the following lines of the server.py code: 
+```python
+# Receive encrypted message from client
+encrypted_message = client_socket.recv(1024).decode()  # Receive and decode
+decrypted_message = cipher.decrypt(encrypted_message)  # Decrypt the message
+``
+The server decrypts the incoming encrypted message using the same shared key. This allows the server operator to read the original message sent by the client. 
