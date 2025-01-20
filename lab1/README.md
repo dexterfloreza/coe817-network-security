@@ -1,6 +1,5 @@
-# COE817 LAB 1
+# COE817 LAB 1 Programming with Sockets in Python
 
-COE817 Lab 1. 
 ## Description
 
 In this lab, we:
