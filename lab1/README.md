@@ -48,6 +48,9 @@ def handle_client(client_socket, client_address):
 Inside this function, the server receives message from the client in the first line, with the argument 1024 specifying the maximum buffer size for the incoming data. In this case, the server can read up to 1024 bytes in a single operation. Then, it decrypts them, and displays them. Then, it waits for input from the server operator, encrypts the response, and sends it back to the client. If the client disconnects, the function ends, and the thread effectively terminates. 
 
 ## Where did you encrypt chat messages in your program?
+
+Every messages sent between the client and server is encrypted before transmission and decrypted upon receipt. Both the client and the server use the same shared Vigenere cipher key (```vigenere_key = "TMU"```) to encrypt and decrypt messages, ensuring secure communication.  
+
 # Encryption on the Client Side
 When the client sends a message to the server, the client first encrypts the message using the Vigenere cipher before sending it. This happens in the following lines: 
 ```python
