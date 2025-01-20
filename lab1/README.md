@@ -1,4 +1,4 @@
-# Project Title
+# COE817 LAB 1
 
 COE817 Lab 1. 
 ## Description
@@ -14,6 +14,7 @@ In Project 1, we developed a server that could handle one client and encrypt/dec
 ## How could our server program handle multiple clients? 
 Our server program handles multiple clients by using multithreading. Each client connection is handled in a separate thread, allowing the server to manage multiple clients concurrently. 
 
+```python
 client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
 client_thread.start()
 
@@ -25,3 +26,4 @@ def handle_client(client_socket, client_address):
         response = input("Enter Server Response: ")
         encrypted_response = cipher.encrypt(response)
         client_socket.send(encrypted_response.encode())
+```
