@@ -8,9 +8,8 @@ In this lab, we:
 - Worked on an implementation of the Vigenere Cipher, the system for encoding and decoding text messages that was discussed in class.
 
 In Project 1, we developed a server that could handle one client and encrypt/decrypt messages transmitted between the client and server through the Vigenere Cipher. Project 2 expands on this by handling multiple clients. 
-## Getting Started
+## Questions and Answers
 
-### Answers to Questions 
 ## How could our server program handle multiple clients? 
 Our server program handles multiple clients by using multithreading. Each client connection is handled in a separate thread, allowing the server to manage multiple clients concurrently. 
 
@@ -30,6 +29,8 @@ After that, for each new client, the server starts a new thread to handle that c
 client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
 client_thread.start()
 ```
+When the function is run in a thread ```threading.Thread```, multiple clients can be handled independently. Each thread runs its own instance of ```handle_client``` for a specific client, ensuring isolated and concurrent communication. 
+
 ```target = handle_client:``` this specifies the function (```handle_client```) that will handle communication with the client. 
 
 ```args=(client_socket, client_address)``` passes the client-specific socket and address to the handle_client function. 
@@ -45,3 +46,5 @@ def handle_client(client_socket, client_address):
         client_socket.send(encrypted_response.encode())
 ```
 Inside this function, the server receives message from the client in the first line, with the argument 1024 specifying the maximum buffer size for the incoming data. In this case, the server can read up to 1024 bytes in a single operation. Then, it decrypts them, and displays them. Then, it waits for input from the server operator, encrypts the response, and sends it back to the client. If the client disconnects, the function ends, and the thread effectively terminates. 
+
+
