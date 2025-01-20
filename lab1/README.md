@@ -17,8 +17,10 @@ Our server program handles multiple clients by using multithreading. Each client
 ```python
 client_thread = threading.Thread(target=handle_client, args=(client_socket, client_address))
 client_thread.start()
-
+```
 The handle_client function processes messages from individual clients. 
+
+```python
 def handle_client(client_socket, client_address):
     while True:
         encrypted_message = client_socket.recv(1024).decode()
