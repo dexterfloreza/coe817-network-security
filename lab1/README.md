@@ -90,5 +90,5 @@ When the server receives the encrypted message from the client, it decrypts the 
 # Receive encrypted message from client
 encrypted_message = client_socket.recv(1024).decode()  # Receive and decode
 decrypted_message = cipher.decrypt(encrypted_message)  # Decrypt the message
-``
+```
 The server decrypts the incoming encrypted message using the same shared key. This allows the server operator to read the original message sent by the client. 
