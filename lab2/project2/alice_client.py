@@ -24,7 +24,7 @@ class alice_client:
             
             # Get encrypted message from Bob
             encrypted_msg = client.recv(4096)
-            decrypted_msg = self.public_key_obj.decrypt_privatekey(encrypted_msg)
+            decrypted_msg = self.public_key_obj.decrypt_privateKey(encrypted_msg)
             received_NA, bob_nonce = decrypted_msg[:16], decrypted_msg[:16]
             
             print(f"Alice received: NA = {received_NA}, NB = {bob_nonce}")
