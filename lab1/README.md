@@ -92,3 +92,8 @@ encrypted_message = client_socket.recv(1024).decode()  # Receive and decode
 decrypted_message = cipher.decrypt(encrypted_message)  # Decrypt the message
 ```
 The server decrypts the incoming encrypted message using the same shared key. This allows the server operator to read the original message sent by the client. 
+
+## References
+1. https://www.geeksforgeeks.org/vigenere-cipher/
+2. https://pages.mtu.edu/~shene/NSF-4/Tutorial/VIG/Vig-Base.html
+
