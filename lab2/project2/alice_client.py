@@ -4,40 +4,58 @@ import pickle
 from public_key_auth import public_KeyAuthentication
 
 class alice_client:
-    def __init__(self, host='localhost', port=12345):
+    def __init__(self, host='localhost', port=65432):
         self.host = host
         self.port = port
         self.public_key_obj = public_KeyAuthentication()
         self.public_key_obj.generate_key_pairs()
         
     def run_alice(self):
-        # Generate Alice's nonce
-        alice_nonce = os.urandom(17)
-        print(f"Alice created nonce: {alice_nonce}")
+        try:
+            # Generate Alice's nonce
+            alice_nonce = os.urandom(16)
+            print(f"Alice created nonce: {alice_nonce}")
         
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client:
-            client.connect((self.host, self.port))
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client:
+                client.connect((self.host, self.port))
             
-            # Sending Alice's public key and nonce info to Bob
-            data = pickle.dumps((self.public_key_obj.serialize_publicKey(), alice_nonce))
-            client.sendall(data)
+                # Sending Alice's public key and nonce info to Bob
+                data = pickle.dumps((self.public_key_obj.serialize_publicKey(), alice_nonce))
+                client.sendall(data)
             
-            # Get encrypted message from Bob
-            encrypted_msg = client.recv(4096)
-            decrypted_msg = self.public_key_obj.decrypt_privateKey(encrypted_msg)
-            received_NA, bob_nonce = decrypted_msg[:16], decrypted_msg[:16]
+                # Get encrypted message from Bob
+                encrypted_msg = client.recv(4096)
+                decrypted_msg = self.public_key_obj.decrypt_privateKey(encrypted_msg)
+                received_NA, bob_nonce = decrypted_msg[:16], decrypted_msg[:16]
             
-            print(f"Alice received: NA = {received_NA}, NB = {bob_nonce}")
+                print(f"Alice received: NA = {received_NA}, NB = {bob_nonce}")
             
-            # Verify Alice's nonce
-            if received_NA == alice_nonce:
-                print("Alice's nonce is verified.")
+                # Verify Alice's nonce
+                if received_NA == alice_nonce:
+                    print("Alice's nonce is verified.")
                 
-            # Encrypt Bob's nonce and send it back to Bob
-            encrypted_response = self.public_key_obj.encrypt_publicKey(
-                self.public_key_obj.deserialize_publicKey(self.public_key_obj.serialize_publicKey()), # Bob's key placeholder
-                bob_nonce
-            )
-            client.sendall(encrypted_response)
+                # Encrypt Bob's nonce and send it back to Bob
+                encrypted_response = self.public_key_obj.encrypt_publicKey(
+                    self.public_key_obj.deserialize_publicKey(self.public_key_obj.serialize_publicKey()), # Bob's key placeholder
+                    bob_nonce
+                )
+                client.sendall(encrypted_response)
             
-            print("Alice sent encrypted NB to Bob.")
+                print("Alice sent encrypted NB to Bob.")
+        
+        except (ConnectionRefusedError, socket.error) as e:
+            print(f"Connection Error: {e}")
+        
+        except pickle.PickleError as e:
+            print(f"Pickle Serialization Error: {e}")
+        
+        except ValueError as e:
+            print(f"Decryption or data handling error: {e}")
+        
+        except Exception as e:
+            print(f"An unexpected error has occurred: {e}")
+
+if __name__ == "__main__":
+    alice = alice_client()
+    alice.run_alice()
+
