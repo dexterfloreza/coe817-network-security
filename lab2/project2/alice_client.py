@@ -22,22 +22,27 @@ class alice_client:
                 # Sending Alice's public key and nonce info to Bob
                 data = pickle.dumps((self.public_key_obj.serialize_publicKey(), alice_nonce))
                 client.sendall(data)
-            
-                # Get encrypted message from Bob
-                encrypted_msg = client.recv(4096)
-                decrypted_msg = self.public_key_obj.decrypt_privateKey(encrypted_msg)
-                received_NA, bob_nonce = decrypted_msg[:16], decrypted_msg[16:]
-            
-                print(f"Alice received: NA = {received_NA}, NB = {bob_nonce}")
-            
-                # Verify Alice's nonce
-                if received_NA == alice_nonce:
-                    print("Alice's nonce is verified.")
+                # print("Alice sent her public key and nonce to Bob. ")
                 
-                # Encrypt Bob's nonce and send it back to Bob
+                # Receive Bob's public key from Bob
                 bob_public_key_bytes = client.recv(4096)
                 bob_public_key = self.public_key_obj.deserialize_publicKey(bob_public_key_bytes)
-                print("Alice received Bob's public key. ")
+                # print("Alice recieved Bob's public key. ")
+                
+                # Get encrypted message from Bob
+                encrypted_msg = client.recv(4096)
+                print("the recieved message 2")
+                decrypted_msg = self.public_key_obj.decrypt_privateKey(encrypted_msg)
+                print("the decrypted message 2")
+                received_NA, bob_nonce = decrypted_msg[:16], decrypted_msg[16:]
+                # print(f"Alice received: NA = {received_NA}, NB = {bob_nonce}")
+
+                # Verify Alice's nonce
+                if received_NA == alice_nonce:
+                    print("the received message 3")
+                else:
+                    print("Nonce verification failed.")
+                    return # Exit if verification fails
                 
                 # Encrypt Bob's nonce with Bob's public key
                 encrypted_response = self.public_key_obj.encrypt_publicKey(
