@@ -26,7 +26,7 @@ class alice_client:
                 # Get encrypted message from Bob
                 encrypted_msg = client.recv(4096)
                 decrypted_msg = self.public_key_obj.decrypt_privateKey(encrypted_msg)
-                received_NA, bob_nonce = decrypted_msg[:16], decrypted_msg[:16]
+                received_NA, bob_nonce = decrypted_msg[:16], decrypted_msg[16:]
             
                 print(f"Alice received: NA = {received_NA}, NB = {bob_nonce}")
             
@@ -35,12 +35,16 @@ class alice_client:
                     print("Alice's nonce is verified.")
                 
                 # Encrypt Bob's nonce and send it back to Bob
+                bob_public_key_bytes = client.recv(4096)
+                bob_public_key = self.public_key_obj.deserialize_publicKey(bob_public_key_bytes)
+                print("Alice received Bob's public key. ")
+                
+                # Encrypt Bob's nonce with Bob's public key
                 encrypted_response = self.public_key_obj.encrypt_publicKey(
-                    self.public_key_obj.deserialize_publicKey(self.public_key_obj.serialize_publicKey()), # Bob's key placeholder
+                    bob_public_key, # Bob's key placeholder
                     bob_nonce
                 )
                 client.sendall(encrypted_response)
-            
                 print("Alice sent encrypted NB to Bob.")
         
         except (ConnectionRefusedError, socket.error) as e:

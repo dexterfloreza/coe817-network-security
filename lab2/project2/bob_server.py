@@ -16,7 +16,6 @@ class bob_server:
             server.listen(1)
             print("Bob is waiting for Alice to connect...")
             
-            
             try:
                 connection, address = server.accept()
                 with connection:
@@ -26,6 +25,9 @@ class bob_server:
                     data =  connection.recv(4096)
                     alice_public_key_bytes, alice_nonce = pickle.loads(data)
                     alice_public_key = self.public_key_obj.deserialize_publicKey(alice_public_key_bytes)
+                    
+                    # Send Bob's public key to Alice
+                    connection.sendall(self.public_key_obj.serialize_publicKey())
                 
                     print(f"Bob recieved Alice's nonce: {alice_nonce}")
                 
@@ -35,7 +37,8 @@ class bob_server:
                 
                     # Encrypt NA and NB with Alice's public key and send back to Alice
                     encrypted_message = self.public_key_obj.encrypt_publicKey(
-                        alice_public_key, (alice_nonce + bob_nonce)
+                        alice_public_key, 
+                        alice_nonce + bob_nonce
                     )
                     connection.sendall(encrypted_message)
                 
