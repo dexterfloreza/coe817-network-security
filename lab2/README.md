@@ -273,14 +273,14 @@ This generates a new nonce.
 ```nonce = str(random.randint(100000, 999999))  # Generate a random nonce```
 Essentially, a nonce is a random six-digit number between 100000 and 999999. Every time Alice (the client) signs a message, a new nonce is generated. This ensures each signed message is unique even if the actual message content M is the same. When Bob receives the message, he checks the nonce and timestamp together to prevent replay attacks.
 
-#Message Signing
+**Message Signing**
 ```def sign_message(message, private_key):
     timestamp = str(int(time.time()))  # Get current time in seconds
     nonce = str(random.randint(100000, 999999))  # Generate a random nonce
     combined_message = message + nonce + timestamp  # Concatenate M + Nonce + Timestamp
 ```
 
-#Message Verification (Bob's Side):
+**Message Verification (Bob's Side):**
 ```def verify_message(message, nonce, timestamp, signature, public_key):
     combined_message = message + nonce + timestamp  # Reconstruct message
 ```
