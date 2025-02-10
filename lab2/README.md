@@ -265,7 +265,7 @@ if __name__ == "__main__":
 ```
 
 
-The original problem was that in the original vulnerable protocol, an atatcker could capture and replace Alice's message to impersonate her. The new solution has the message include a timestamp to track when it was sent, a signature which includes the timestamp soi tcannot be altered, and then Bob must verify it so that the signature is valid (ensuring message authenticity) and that the timestamp is within the last 30 seconds (effectively preventing replay attacks). 
+The original problem was that in the original vulnerable protocol, an atatcker could capture and replace Alice's message to impersonate her. The new solution has the message include a timestamp to track when it was sent, a signature which includes the timestamp which cannot be altered, and then Bob must verify it so that the signature is valid (ensuring message authenticity) and that the timestamp is within the last 30 seconds (effectively preventing replay attacks). 
 
 To specify, replay attacks are prevented by including timestamps (a timestamp that's too old would be rejected by Bob) and through nonces (which ensures uniqueness, making it difficult for attackers to manipulate old messages).
 
