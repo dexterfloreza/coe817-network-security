@@ -117,5 +117,153 @@ The execution follow can be summarized as follows:
 ## For Project 2, show the following messages: the received message 1, the received message 2, the decrypted messsage 2, the received message 3, the decrypted message 3
 
 ## For Project 3, explain your revised design of the protocol. Show the received signature of message M. 
+For Project 3, we've implemented:
+1. RSA key pair generation (Public/Private Keys)
+2. Message signing by Alice using her private key.
+3. Signature verification by bob using Alice's public key.
+4. Protectoin against replay attacks by including a nonce (timestamp-based) in the signed message.
 
+The code below contains functions for RSA key generation, message signing, and verification.
+```from Crypto.PublicKey import RSA
+from Crypto.Signature import pkcs1_15
+from Crypto.Hash import SHA256
+import base64
+import time
+import json
+
+# Generate RSA key pair
+def generate_rsa_keys():
+    key = RSA.generate(2048)
+    private_key = key.export_key()
+    public_key = key.publickey().export_key()
+    return private_key, public_key
+
+# Sign message with Alice's private key
+def sign_message(private_key, message):
+    key = RSA.import_key(private_key)
+    message_bytes = message.encode()
+    hashed_message = SHA256.new(message_bytes)
+    signature = pkcs1_15.new(key).sign(hashed_message)
+    return base64.b64encode(signature).decode()
+
+# Verify signature using Alice's public key
+def verify_signature(public_key, message, signature):
+    key = RSA.import_key(public_key)
+    message_bytes = message.encode()
+    hashed_message = SHA256.new(message_bytes)
+    try:
+        pkcs1_15.new(key).verify(hashed_message, base64.b64decode(signature))
+        return True
+    except (ValueError, TypeError):
+        return False
+```
+
+
+Furthermore, we've also updated the authentication protocol such that Bob verifies both the signature and the freshness of the timestamp to prevent replay attacks.
+
+In Alice's script, we have Alice (the client) who generates an RSA key pair, signs a message along with a teimstamp, and then sends the message, timestamp, and signature to Bob.
+```
+# alice.py
+import socket
+import json
+import datetime
+from digital_signature import generate_rsa_keys, sign_message
+
+class Alice:
+    def __init__(self):
+        self.private_key, self.public_key = generate_rsa_keys()  # Generate RSA keys
+        self.ID_A = "Alice"
+
+    def initiate_communication(self, bob_host, bob_port):
+        try:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                print("[Alice] Connecting to Bob...")
+                s.connect((bob_host, bob_port))
+                print("[Alice] Connected!")
+
+                message = "Hello, Bob. This is Alice."
+                timestamp = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")  # Human-readable timestamp
+                data_to_sign = message + timestamp  # Concatenate message with timestamp
+                
+                signature = sign_message(self.private_key, data_to_sign)
+
+                signed_message = json.dumps({
+                    "ID": self.ID_A,
+                    "Message": message,
+                    "Timestamp": timestamp,
+                    "Signature": signature,
+                    "PublicKey": self.public_key.decode()  # Send public key for verification
+                })
+
+                s.sendall(signed_message.encode())
+                print(f"[Alice] Sent signed message: {signed_message}")
+
+        except Exception as e:
+            print(f"[Alice] Error: {e}")
+
+if __name__ == "__main__":
+    alice = Alice()
+    alice.initiate_communication("127.0.0.1", 65432)
+```
+
+
+
+In Bob's script, Bob receives Alice's signed message, verifies the signature using Alice's public key, and then checks the timestamp to prevent replay attacks.
+```
+# bob_server.py
+import socket
+import json
+import datetime
+from digital_signature import generate_rsa_keys, sign_message
+
+class Bob:
+    def __init__(self):
+        self.ID_B = "Bob"
+
+    def start_server(self, host, port):
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind((host, port))
+            s.listen()
+            print("[Bob] Waiting for Alice...")
+
+            conn, addr = s.accept()
+            with conn:
+                print(f"[Bob] Connected by {addr}")
+
+                received_data = conn.recv(4096).decode()
+                received_json = json.loads(received_data)
+
+                alice_id = received_json["ID"]
+                message = received_json["Message"]
+                timestamp = received_json["Timestamp"]
+                signature = received_json["Signature"]
+                public_key = received_json["PublicKey"]
+
+                print(f"[Bob] Received message from {alice_id}: {message}")
+                print(f"[Bob] Received timestamp: {timestamp}")
+                print(f"[Bob] Received signature: {signature}")
+
+                # Verify the signature
+                data_to_verify = message + timestamp
+                is_valid = verify_signature(public_key, data_to_verify, signature)
+
+                # Convert timestamp to datetime object
+                message_time = datetime.datetime.strptime(timestamp, "%Y-%m-%d %H:%M:%S")
+                current_time = datetime.datetime.now()
+                is_fresh = (current_time - message_time).total_seconds() < 30  # Check if within 30 seconds
+
+                if is_valid and is_fresh:
+                    print("[Bob] Signature is valid and message is fresh. Authentication successful!")
+                elif not is_valid:
+                    print("[Bob] Signature verification failed! Possible tampering.")
+                else:
+                    print("[Bob] Message is too old! Possible replay attack.")
+
+if __name__ == "__main__":
+    bob = Bob()
+    bob.start_server("127.0.0.1", 65432)
+```
+
+
+The original problem was that in the original vulnerable protocol, an atatcker could capture and replace Alice's message to impersonate her. The new solution has the message include a timestamp to track when it was sent, a signature which includes the timestamp so i tcannot be altered, and then Bob must verify it so that the signature is valid (ensuring message authenticity) and that the timestamp is within the last 30 seconds (effectively preventing replay attacks).
 
