@@ -265,5 +265,24 @@ if __name__ == "__main__":
 ```
 
 
-The original problem was that in the original vulnerable protocol, an atatcker could capture and replace Alice's message to impersonate her. The new solution has the message include a timestamp to track when it was sent, a signature which includes the timestamp so i tcannot be altered, and then Bob must verify it so that the signature is valid (ensuring message authenticity) and that the timestamp is within the last 30 seconds (effectively preventing replay attacks).
+The original problem was that in the original vulnerable protocol, an atatcker could capture and replace Alice's message to impersonate her. The new solution has the message include a timestamp to track when it was sent, a signature which includes the timestamp soi tcannot be altered, and then Bob must verify it so that the signature is valid (ensuring message authenticity) and that the timestamp is within the last 30 seconds (effectively preventing replay attacks). 
+
+To specify, replay attacks are prevented by including timestamps (a timestamp that's too old would be rejected by Bob) and through nonces (which ensures uniqueness, making it difficult for attackers to manipulate old messages).
+
+This generates a new nonce. 
+```nonce = str(random.randint(100000, 999999))  # Generate a random nonce```
+Essentially, a nonce is a random six-digit number between 100000 and 999999. Every time Alice (the client) signs a message, a new nonce is generated. This ensures each signed message is unique even if the actual message content M is the same. When Bob receives the message, he checks the nonce and timestamp together to prevent replay attacks.
+
+#Message Signing
+```def sign_message(message, private_key):
+    timestamp = str(int(time.time()))  # Get current time in seconds
+    nonce = str(random.randint(100000, 999999))  # Generate a random nonce
+    combined_message = message + nonce + timestamp  # Concatenate M + Nonce + Timestamp
+```
+
+#Message Verification (Bob's Side):
+```def verify_message(message, nonce, timestamp, signature, public_key):
+    combined_message = message + nonce + timestamp  # Reconstruct message
+```
+
 
