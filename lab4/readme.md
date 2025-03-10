@@ -54,8 +54,6 @@ Each client:
 
 Your program needs to generate the message of protocol in (1) and display it. Then show TA if the same message M could be received by B and C after decryption and signature verification.
 
-Explain your code and tell how your KDC progfram could successfully forward a message to remainin cients. For example, if a chat messge is from A, your program will ensure that KDC wll forward A's message to B and C only. 
-
 Basically, the following sequence of events is followed to successfully forward messages to clients.
 
 If Alice sends a message:
